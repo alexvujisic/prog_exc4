@@ -22,17 +22,26 @@ public class WatchlistController implements Initializable {
     @FXML
     public JFXListView watchlistView;
 
-    private WatchlistRepository watchlistRepository;
+    //private WatchlistRepository watchlistRepository;
 
     protected ObservableList<WatchlistMovieEntity> observableWatchlist = FXCollections.observableArrayList();
+
+    private static WatchlistController instance;
+
+    public static WatchlistController getInstance(){
+        if (instance == null) {
+            instance = new WatchlistController();
+        }
+        return instance;
+    }
+
 
     private final ClickEventHandler onRemoveFromWatchlistClicked = (o) -> {
         if (o instanceof WatchlistMovieEntity) {
             WatchlistMovieEntity watchlistMovieEntity = (WatchlistMovieEntity) o;
 
             try {
-                WatchlistRepository watchlistRepository = new WatchlistRepository();
-                watchlistRepository.removeFromWatchlist(watchlistMovieEntity);
+                WatchlistRepository.getInstance().removeFromWatchlist(watchlistMovieEntity);
                 observableWatchlist.remove(watchlistMovieEntity);
             } catch (DataBaseException e) {
                 UserDialog dialog = new UserDialog("Database Error", "Could not remove movie from watchlist");
@@ -47,7 +56,7 @@ public class WatchlistController implements Initializable {
 
         List<WatchlistMovieEntity> watchlist = new ArrayList<>();
         try {
-            watchlistRepository = new WatchlistRepository();
+            //watchlistRepository = new WatchlistRepository();
             watchlist = getWatchlist();
             observableWatchlist.addAll(getWatchlist());
             watchlistView.setItems(observableWatchlist);
@@ -68,6 +77,6 @@ public class WatchlistController implements Initializable {
     }
 
     private List<WatchlistMovieEntity> getWatchlist() throws DataBaseException {
-        return watchlistRepository.readWatchlist();
+        return WatchlistRepository.getInstance().readWatchlist();
     }
 }

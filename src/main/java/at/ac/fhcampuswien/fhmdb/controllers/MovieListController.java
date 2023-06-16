@@ -9,6 +9,7 @@ import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.SortedState;
+import at.ac.fhcampuswien.fhmdb.states.*;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import at.ac.fhcampuswien.fhmdb.ui.UserDialog;
 import com.jfoenix.controls.JFXButton;
@@ -51,9 +52,21 @@ public class MovieListController implements Initializable {
 
     public List<Movie> allMovies;
 
+    public List<Movie> movieList;
+
     protected ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
     protected SortedState sortedState;
+
+    private MovieListState movieListState;
+    private static MovieListController instance = new MovieListController();
+
+    public static MovieListController getInstance(){
+        if (instance == null) {
+            instance = new MovieListController();
+        }
+        return instance;
+    }
 
     private final ClickEventHandler onAddToWatchlistClicked = (clickedItem) -> {
         if (clickedItem instanceof Movie movie) {
@@ -67,8 +80,9 @@ public class MovieListController implements Initializable {
                     movie.getLengthInMinutes(),
                     movie.getRating());
             try {
-                WatchlistRepository repository = new WatchlistRepository();
-                repository.addToWatchlist(watchlistMovieEntity);
+                /*WatchlistRepository repository = new WatchlistRepository();
+                repository.addToWatchlist(watchlistMovieEntity);*/
+                WatchlistRepository.getInstance().addToWatchlist(watchlistMovieEntity);
             } catch (DataBaseException e) {
                 UserDialog dialog = new UserDialog("Database Error", "Could not add movie to watchlist");
                 dialog.show();
@@ -79,19 +93,25 @@ public class MovieListController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        movieListState = new DefaultState();
+        initializeMovies();
         initializeState();
         initializeLayout();
     }
 
-    public void initializeState() {
-        List<Movie> result = new ArrayList<>();
+    public void initializeMovies(){
         try {
-            result = MovieAPI.getAllMovies();
+            movieList = MovieAPI.getAllMovies();
         } catch (MovieApiException e){
             UserDialog dialog = new UserDialog("MovieAPI Error", "Could not load movies from api");
             dialog.show();
         }
 
+    }
+
+    public void initializeState() {
+        List<Movie> result = new ArrayList<>();
+        result.addAll(movieListState.sorted(MovieListController.getInstance() ,movieList));
         setMovies(result);
         setMovieList(result);
         sortedState = SortedState.NONE;
@@ -139,9 +159,17 @@ public class MovieListController implements Initializable {
     }
     public void sortMovies(){
         if (sortedState == SortedState.NONE || sortedState == SortedState.DESCENDING) {
-            sortMovies(SortedState.ASCENDING);
+            //sortMovies(SortedState.ASCENDING);
+            movieListState = new AscendingState();
+            sortedState = SortedState.ASCENDING;
+            observableMovies.clear();
+            observableMovies.addAll(movieListState.sorted(MovieListController.getInstance(), movieList));
         } else if (sortedState == SortedState.ASCENDING) {
-            sortMovies(SortedState.DESCENDING);
+            //sortMovies(SortedState.DESCENDING);
+            movieListState = new DscendingState();
+            sortedState = SortedState.DESCENDING;
+            observableMovies.clear();
+            observableMovies.addAll(movieListState.sorted(MovieListController.getInstance(), movieList));
         }
     }
     // sort movies based on sortedState
@@ -207,7 +235,11 @@ public class MovieListController implements Initializable {
         }
 
         List<Movie> movies = getMovies(searchQuery, genre, releaseYear, ratingFrom);
-
+        //reset condition
+        if(searchQuery == null && releaseYear == "No filter" && ratingFrom == "No filter" && genreValue == "No filter"){
+            setMovies(movieList);
+            setMovieList(movieList);
+        }
         setMovies(movies);
         setMovieList(movies);
         // applyAllFilters(searchQuery, genre);
@@ -236,6 +268,12 @@ public class MovieListController implements Initializable {
     }
 
     public void sortBtnClicked(ActionEvent actionEvent) {
-        sortMovies();
+        observableMovies.clear();
+        observableMovies.addAll(movieListState.sorted(this, movieList));
+        //sortMovies();
+    }
+
+    public void setState(MovieListState state){
+        this.movieListState = state;
     }
 }

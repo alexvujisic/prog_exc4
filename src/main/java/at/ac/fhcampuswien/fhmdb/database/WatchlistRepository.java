@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.database;
 
+import at.ac.fhcampuswien.fhmdb.controllers.MovieListController;
 import com.j256.ormlite.dao.Dao;
 
 import java.util.List;
@@ -7,6 +8,15 @@ import java.util.List;
 public class WatchlistRepository {
 
     Dao<WatchlistMovieEntity, Long> dao;
+    private static WatchlistRepository instance;
+
+    public static WatchlistRepository getInstance() throws DataBaseException {
+        if (instance == null) {
+            instance = new WatchlistRepository();
+        }
+        return instance;
+    }
+
 
     public WatchlistRepository() throws DataBaseException {
         try {
