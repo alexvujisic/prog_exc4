@@ -1,5 +1,7 @@
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.controllers.WatchlistController;
+import at.ac.fhcampuswien.fhmdb.database.WatchlistMovieEntity;
 import at.ac.fhcampuswien.fhmdb.enums.UIComponent;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +21,7 @@ public class FhmdbApplication extends Application {
             scene.getStylesheets().add(Objects.requireNonNull(FhmdbApplication.class.getResource("/styles/styles.css")).toExternalForm());
             stage.setTitle("FHMDb!");
             stage.setScene(scene);
+            WatchlistController.getInstance();
             stage.show();
         } catch (IOException e) {
             System.err.println("Cannot load scene from " + UIComponent.HOME.path);

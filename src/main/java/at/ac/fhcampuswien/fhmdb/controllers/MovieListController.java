@@ -52,6 +52,8 @@ public class MovieListController implements Initializable {
 
     public List<Movie> allMovies;
 
+    public List<Movie> sortingMovies = new ArrayList<>();
+
     public List<Movie> movieList;
 
     protected ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
@@ -115,6 +117,7 @@ public class MovieListController implements Initializable {
         setMovies(result);
         setMovieList(result);
         sortedState = SortedState.NONE;
+        sortingMovies.addAll(movieList);
     }
 
     public void initializeLayout() {
@@ -237,10 +240,11 @@ public class MovieListController implements Initializable {
         List<Movie> movies = getMovies(searchQuery, genre, releaseYear, ratingFrom);
         //reset condition
         if(searchQuery == null && releaseYear == "No filter" && ratingFrom == "No filter" && genreValue == "No filter"){
-            setMovies(movieList);
-            setMovieList(movieList);
+            setMovies(observableMovies);
         }
-        setMovies(movies);
+        sortingMovies.clear();
+        sortingMovies.addAll(movies);
+
         setMovieList(movies);
         // applyAllFilters(searchQuery, genre);
 
@@ -267,9 +271,16 @@ public class MovieListController implements Initializable {
         }
     }
 
+    public List<Movie> getMovieList() {
+        return movieList;
+    }
+
     public void sortBtnClicked(ActionEvent actionEvent) {
-        observableMovies.clear();
-        observableMovies.addAll(movieListState.sorted(this, movieList));
+        //observableMovies.clear();
+        //observableMovies.addAll(movieListState.sorted(this, movieList));
+        setMovieList(movieListState.sorted(this, sortingMovies));
+        //movieList.clear();
+        //movieList.addAll(observableMovies);
         //sortMovies();
     }
 
