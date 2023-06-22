@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class WatchlistController implements Initializable {
+public class WatchlistController implements Initializable, Observer {
 
     @FXML
     public JFXListView watchlistView;
@@ -56,6 +56,11 @@ public class WatchlistController implements Initializable {
 
         List<WatchlistMovieEntity> watchlist = new ArrayList<>();
         try {
+            WatchlistRepository.getInstance().addObserver(this);
+        } catch (DataBaseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
             //watchlistRepository = new WatchlistRepository();
             watchlist = getWatchlist();
             observableWatchlist.addAll(getWatchlist());
@@ -78,5 +83,16 @@ public class WatchlistController implements Initializable {
 
     private List<WatchlistMovieEntity> getWatchlist() throws DataBaseException {
         return WatchlistRepository.getInstance().readWatchlist();
+    }
+
+    @Override
+    public void update(String output) {
+        System.out.println("????????????!!!!!!!!"+output);
+        try {
+            System.out.println("Watchlist: ");
+            this.getWatchlist().forEach(watchlistMovieEntity -> System.out.println(watchlistMovieEntity.getTitle()));
+        } catch (DataBaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
