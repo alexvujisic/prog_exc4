@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -87,12 +88,8 @@ public class WatchlistController implements Initializable, Observer {
 
     @Override
     public void update(String output) {
-        System.out.println("????????????!!!!!!!!"+output);
-        try {
-            System.out.println("Watchlist: ");
-            this.getWatchlist().forEach(watchlistMovieEntity -> System.out.println(watchlistMovieEntity.getTitle()));
-        } catch (DataBaseException e) {
-            throw new RuntimeException(e);
-        }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(output);
+        alert.show();
     }
 }
